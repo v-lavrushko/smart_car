@@ -6,14 +6,14 @@ AF_DCMotor motorru(3);
 
 #include <SoftwareSerial.h>
 
-/*SoftwareSerial mySerial(7, 8); // RX, TX  
+SoftwareSerial mySerial(7, 8); // RX, TX  
 
 // Connect HM10      Arduino Uno
 
 //     Pin 1/TXD          Pin 7
 
 //     Pin 2/RXD          Pin 8
-*/
+
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -58,6 +58,7 @@ unsigned int duration, distance;
   int left_int = -2;
   bool if_on_car = false;
   int current_side = 0;
+  int bluetooth_value;
   int rht, lft;
   
 // Values for accelerometer
@@ -154,18 +155,24 @@ void left();
 void stap();
 void move_right_90(float an_pre);
 void move_left_90(float an_pre);
-
+int get_bluetooth();
 
 void loop(){
+    
+  bluetooth_value = get_bluetooth();
   yaw_0 = get_angle();
-  
-  /*if (get_bluetooth()){
-    if_on_car = !if_on_car;
-  }*/
-  
-  current_side = check_side();
+    
+  if (bluetooth_value == forward_int){
+      if_on_car = true;
+  }
+  else if (bluetooth_value == stop_int)
+  {
+      if_on_car = false;
+  }
+    
   //Serial.println(current_side);
-  //if (if_on_car){
+  if (if_on_car){
+    current_side = check_side();
     if (current_side == forward_int){
     forward();  
     }
@@ -175,32 +182,32 @@ void loop(){
     else if (current_side == right_int){
       move_right_90(yaw_0);
     }
-  /*}
+  }
   else {
     stap();
-  }*/
+  }
 }
 
 
-/*bool get_bluetooth(){
-  char c;  
+int get_bluetooth(){
+  char c == 'a';  
 
   if (mySerial.available()) {
     c = mySerial.read();
     if (c == '1')
     {
-      return true;
+      return forward_int;
     }
-
     else if (c == '0')
     {
-      return true;
+      return stop_int;
     }
-    else {
-      return false;  
+    else 
+    {
+      return right_int;
     }
   }
-}*/
+}
 
 
 int check_side(){
@@ -230,12 +237,12 @@ int check_side(){
   Serial.print(" R:");
   Serial.print(rht);
   if (rht < lft) {
-    Serial.println(" | L");
-    return left_int;
-  } 
-  else {
     Serial.println(" | R");
     return right_int;
+  } 
+  else {
+    Serial.println(" | L");
+    return left_int;
   }
 }
 
